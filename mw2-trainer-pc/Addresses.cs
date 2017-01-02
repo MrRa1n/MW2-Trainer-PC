@@ -3,7 +3,7 @@
     class Addresses
     {
         // Player Stat Addresses
-        public static uint
+        public static int
             XP = 0x01B8B768,
             Score = 0x01B8B778,
             Kills = 0x01B8B77C,
@@ -22,7 +22,7 @@
             AllEmblems = 0x1B8C947;
 
         // Class Name Addresses
-        public static uint
+        public static int
             Class1 = 0x01B8BB40,
             Class2 = 0x01B8BB80,
             Class3 = 0x01B8BBC0,
@@ -33,5 +33,8 @@
             Class8 = 0x01B8BD00,
             Class9 = 0x01B8BD40,
             Class10 = 0x01B8BD80;
+
+        public static int[] classnames = { Class1, Class2, Class3,
+        Class4, Class5, Class6, Class7, Class8, Class9, Class10 };
     }
 }

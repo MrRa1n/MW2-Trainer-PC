@@ -11,7 +11,11 @@ namespace mw2_trainer_pc
         private static byte[] titleBytes = null;
         private static byte[] emblemBytes = null;
 
+        private static Random rnd = new Random();
         public static bool gameIsOpen = pc.ProcessHandle("iw4mp");
+        //public static char keyPressed = Console.ReadKey().KeyChar;
+
+        private static int score, wins, losses, ties, winstreak, kills, headshots, assists, killstreak, deaths;
 
         public static void Menu_Options()
         {
@@ -20,6 +24,7 @@ namespace mw2_trainer_pc
                   "# 1. Unlock All Challenges, Titles and Emblems\n" 
                 + "# 2. Set Custom Player Stats\n" 
                 + "# 3. Set Prestige Level\n"
+                + "# 4. Set Class Names"
                 );
             char keyPressed = Console.ReadKey().KeyChar;
 
@@ -41,8 +46,14 @@ namespace mw2_trainer_pc
                     case '3': // seems to work but maybe move to own method
                         Console_Welcome();
                             Console.Write("Enter Prestige Level: ");
-                            pc.WriteInteger(Addresses.Prestige, UInt32.Parse(Console.ReadLine()));
-                        MessageBox.Show("Prestige Level Set!");
+                            pc.WriteInteger(Addresses.Prestige, Int32.Parse(Console.ReadLine()));
+                            Console.Write("Enter Player XP: ");
+                            pc.WriteInteger(Addresses.XP, int.Parse(Console.ReadLine()));
+                        MessageBox.Show("Prestige and Level Set!");
+                        Menu_Options();
+                        break;
+                    case '4':
+                        RenameClasses();
                         Menu_Options();
                         break;
                 }
@@ -69,9 +80,30 @@ namespace mw2_trainer_pc
                 + "# 4. Custom Player Stats\n"
                 );
 
+            char keyPressed = Console.ReadKey().KeyChar;
+
+            switch (keyPressed)
+            {
+                case '1':
+                    SetInsanePlayerStats(1337, int.MaxValue);
+                    Menu_Options();
+                    break;
+                case '2':
+                    SetInsanePlayerStats(999, 99999999 / 50);
+                    Menu_Options();
+                    break;
+                case '3':
+                    SetInsanePlayerStats(999, 999999);
+                    Menu_Options();
+                    break;
+                case '4':
+                    SetCustomPlayerStats();
+                    Menu_Options();
+                    break;
+            }
         }
 
-        private static void PerformUnlocks(byte[] val, int size, byte val2, uint address)
+        private static void PerformUnlocks(byte[] val, int size, byte val2, int address)
         {
             val = new byte[size];
             for (int i = 0; i < val.Length; i++)
@@ -79,19 +111,84 @@ namespace mw2_trainer_pc
             pc.WriteBytes(address, val);
         }
 
-        private static void SetPlayerStats(uint value)
+        private static void SetInsanePlayerStats(int low, int high)
         {
-            pc.WriteInteger(Addresses.XP, value);
-            pc.WriteInteger(Addresses.Score, value);
-            pc.WriteInteger(Addresses.Kills, value);
-            pc.WriteInteger(Addresses.Deaths, value / 200);
-            pc.WriteInteger(Addresses.Wins, value);
-            pc.WriteInteger(Addresses.Losses, value / 350);
-            pc.WriteInteger(Addresses.Headshots, value);
-            pc.WriteInteger(Addresses.Ties, value / 4);
-            pc.WriteInteger(Addresses.Winstreak, value);
-            pc.WriteInteger(Addresses.Assists, value / 3);
-            pc.WriteInteger(Addresses.Killstreak, value);
+            pc.WriteInteger(Addresses.Score, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Wins, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Losses, rnd.Next(low, high) / 50);
+            pc.WriteInteger(Addresses.Ties, rnd.Next(low, high) / 50);
+            pc.WriteInteger(Addresses.Winstreak, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Kills, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Assists, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Killstreak, rnd.Next(low, high));
+            pc.WriteInteger(Addresses.Deaths, rnd.Next(low, high) / 50);
+            pc.WriteInteger(Addresses.Headshots, rnd.Next(low, high));
+        }
+
+        private static void SetCustomPlayerStats()
+        {
+            Console.Clear();
+            
+            Console.Write("Player Score: ");
+            IsCorrectStatValue(Addresses.Score, score);
+
+            Console.Write("Player Wins: ");
+            IsCorrectStatValue(Addresses.Wins, wins);
+
+            Console.Write("Player Losses: ");
+            IsCorrectStatValue(Addresses.Losses, losses);
+
+            Console.Write("Player Ties: ");
+            IsCorrectStatValue(Addresses.Ties, ties);
+
+            Console.Write("Player Winstreak: ");
+            IsCorrectStatValue(Addresses.Winstreak, winstreak);
+
+            Console.Write("Player Kills: ");
+            IsCorrectStatValue(Addresses.Kills, kills);
+
+            Console.Write("Player Headshots: ");
+            IsCorrectStatValue(Addresses.Headshots, headshots);
+
+            Console.Write("Player Assists: ");
+            IsCorrectStatValue(Addresses.Assists, assists);
+
+            Console.Write("Player Killstreak: ");
+            IsCorrectStatValue(Addresses.Killstreak, killstreak);
+
+            Console.ReadLine();
+        }
+
+        private static void IsCorrectStatValue(int addr, int val)
+        {
+            bool valid_number = int.TryParse(Console.ReadLine(), out val);
+
+            if (!valid_number)
+            {
+                MessageBox.Show("Please enter a value between 0 and " + int.MaxValue);
+                SetCustomPlayerStats();
+            }
+            else
+            {
+                pc.WriteInteger(addr, val);
+            }
+        }
+
+        private static void RenameClasses()
+        {
+            Console.Clear();
+            Console.Write("Class Names: ");
+            whatever(Addresses.classnames, Console.ReadLine());
+        }
+
+        private static void whatever(int[] addr, string cname)
+        {
+            
+            for (int i = 0; i < 10; i++)
+            {
+                pc.WriteLongerNOP(addr[i]);
+                pc.WriteString(addr[i], cname);
+            }
         }
 
         private static void Console_Welcome()
