@@ -15,7 +15,8 @@ namespace mw2_trainer_pc
         public static bool gameIsOpen = pc.ProcessHandle("iw4mp");
         //public static char keyPressed = Console.ReadKey().KeyChar;
 
-        private static int score, wins, losses, ties, winstreak, kills, headshots, assists, killstreak, deaths;
+        private static int score, wins, losses, ties, winstreak, 
+            kills, headshots, assists, killstreak, deaths, exp;
 
         public static void Menu_Options()
         {
@@ -44,12 +45,7 @@ namespace mw2_trainer_pc
                             Stats_Sub_Menu();
                         break;
                     case '3': // seems to work but maybe move to own method
-                        Console_Welcome();
-                            Console.Write("Enter Prestige Level: ");
-                            pc.WriteInteger(Addresses.Prestige, Int32.Parse(Console.ReadLine()));
-                            Console.Write("Enter Player XP: ");
-                            pc.WriteInteger(Addresses.XP, int.Parse(Console.ReadLine()));
-                        MessageBox.Show("Prestige and Level Set!");
+                        SetPrestigeRank();
                         Menu_Options();
                         break;
                     case '4':
@@ -123,11 +119,34 @@ namespace mw2_trainer_pc
             pc.WriteInteger(Addresses.Killstreak, rnd.Next(low, high));
             pc.WriteInteger(Addresses.Deaths, rnd.Next(low, high) / 50);
             pc.WriteInteger(Addresses.Headshots, rnd.Next(low, high));
+
+            MessageBox.Show("Player stats have been set!");
+        }
+
+        private static void SetPrestigeRank()
+        {
+            Console_Welcome();
+
+            Console.Write("Enter Prestige Level: ");
+            int prestige = int.Parse(Console.ReadLine());
+
+            if (prestige > 11)
+            {
+                MessageBox.Show("Nope");
+                SetPrestigeRank();
+            }
+            else
+                pc.WriteInteger(Addresses.Prestige, prestige);
+
+            Console.Write("Enter Player XP: ");
+            IsCorrectStatValue(Addresses.XP, exp);
+            
+            MessageBox.Show("Prestige and Level Set!");
         }
 
         private static void SetCustomPlayerStats()
         {
-            Console.Clear();
+            Console_Welcome();
             
             Console.Write("Player Score: ");
             IsCorrectStatValue(Addresses.Score, score);
@@ -166,7 +185,7 @@ namespace mw2_trainer_pc
             if (!valid_number)
             {
                 MessageBox.Show("Please enter a value between 0 and " + int.MaxValue);
-                SetCustomPlayerStats();
+                Menu_Options();
             }
             else
             {
@@ -178,17 +197,17 @@ namespace mw2_trainer_pc
         {
             Console.Clear();
             Console.Write("Class Names: ");
-            whatever(Addresses.classnames, Console.ReadLine());
+            SetAllClassNames(Addresses.classnames, Console.ReadLine());
         }
 
-        private static void whatever(int[] addr, string cname)
+        private static void SetAllClassNames(int[] addr, string cname)
         {
-            
             for (int i = 0; i < 10; i++)
             {
-                pc.WriteLongerNOP(addr[i]);
+                pc.WriteNOP(addr[i]);
                 pc.WriteString(addr[i], cname);
             }
+            MessageBox.Show("All class names set!");
         }
 
         private static void Console_Welcome()

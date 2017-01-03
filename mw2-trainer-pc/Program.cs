@@ -10,6 +10,7 @@ namespace mw2_trainer_pc
     {
         static void Main(string[] args)
         {
+            Console.ForegroundColor = ConsoleColor.Green;
             Methods.Menu_Options();
         }
     }
